@@ -1,13 +1,19 @@
 FROM python:3.10-slim
 
-RUN apt-get update
-
 WORKDIR /app
 
+# Copy and install Python dependencies
 COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-RUN pip install -r /app/requirements.txt
-
+# Copy application code
 COPY . .
 
-ENTRYPOINT ["python3", "make_book.py"]
+# Create directories for file storage
+RUN mkdir -p /app/uploads /app/outputs
+
+# Expose port for API
+EXPOSE 8000
+
+# Default command (will be overridden by docker-compose)
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

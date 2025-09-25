@@ -82,3 +82,10 @@ uritemplate==4.1.1
 urllib3==2.2.1
 yarl==1.9.4
 zipp==3.18.1
+
+# API Server dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+redis==5.0.1
+celery==5.3.4

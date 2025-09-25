@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilingual Book Maker</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="title">📚 Bilingual Book Maker</h1>
+            <p class="subtitle">Transform your books into bilingual editions with AI translation</p>
+        </header>
+
+        <!-- Upload Form -->
+        <section class="upload-section">
+            <div class="card">
+                <h2 class="section-title">Upload & Configure</h2>
+                
+                <form id="uploadForm" class="upload-form">
+                    <!-- File Upload -->
+                    <div class="form-group">
+                        <label for="files" class="form-label">
+                            <span class="label-text">Select Files</span>
+                            <span class="label-hint">Support: .epub, .txt, .srt</span>
+                        </label>
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <input type="file" id="files" name="files" multiple 
+                                   accept=".epub,.txt,.srt" class="file-input">
+                            <div class="file-upload-content">
+                                <div class="upload-icon">📁</div>
+                                <p class="upload-text">
+                                    <strong>Click to select files</strong> or drag and drop
+                                </p>
+                                <p class="upload-hint">Multiple files supported</p>
+                            </div>
+                        </div>
+                        <div id="fileList" class="file-list"></div>
+                    </div>
+
+                    <!-- Translation Settings -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="model" class="form-label">AI Model</label>
+                            <select id="model" name="model" class="form-select">
+                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Fast)</option>
+                                <option value="gpt-4">GPT-4 (Better Quality)</option>
+                                <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+                                <option value="gemini-pro">Gemini Pro</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="language" class="form-label">Target Language</label>
+                            <select id="language" name="language" class="form-select">
+                                <option value="vietnamese">Vietnamese</option>
+                                <option value="chinese">Chinese</option>
+                                <option value="japanese">Japanese</option>
+                                <option value="korean">Korean</option>
+                                <option value="spanish">Spanish</option>
+                                <option value="french">French</option>
+                                <option value="german">German</option>
+                                <option value="russian">Russian</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Settings -->
+                    <div class="form-group">
+                        <button type="button" class="toggle-advanced" id="toggleAdvanced">
+                            <span>⚙️ Advanced Settings</span>
+                            <span class="toggle-icon">▼</span>
+                        </button>
+                        
+                        <div id="advancedSettings" class="advanced-settings">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="translateTags" class="form-label">
+                                        <span class="label-text">HTML Tags to Translate</span>
+                                        <span class="label-hint">Comma separated (e.g., p,h1,h2)</span>
+                                    </label>
+                                    <input type="text" id="translateTags" name="translate_tags" 
+                                           value="p" class="form-input">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="resume" name="resume" class="form-checkbox">
+                                        <span class="checkbox-text">Resume from previous translation</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="bookFrom" class="form-label">
+                                        <span class="label-text">Source Language (Optional)</span>
+                                        <span class="label-hint">Leave empty for auto-detection</span>
+                                    </label>
+                                    <input type="text" id="bookFrom" name="book_from" 
+                                           placeholder="e.g., English" class="form-input">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="bookTo" class="form-label">
+                                        <span class="label-text">Target Description (Optional)</span>
+                                        <span class="label-hint">Custom target language description</span>
+                                    </label>
+                                    <input type="text" id="bookTo" name="book_to" 
+                                           placeholder="e.g., Tiếng Việt" class="form-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="form-actions">
+                        <button type="submit" id="submitBtn" class="btn btn-primary">
+                            <span class="btn-text">🚀 Start Translation</span>
+                            <span class="btn-loading">⏳ Processing...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Progress Section -->
+        <section id="progressSection" class="progress-section hidden">
+            <div class="card">
+                <h2 class="section-title">Translation Progress</h2>
+                
+                <div class="progress-info">
+                    <div class="progress-stats">
+                        <div class="stat">
+                            <span class="stat-label">Status:</span>
+                            <span id="taskStatus" class="stat-value">Starting...</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Current File:</span>
+                            <span id="currentFile" class="stat-value">-</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Progress:</span>
+                            <span id="progressText" class="stat-value">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div id="progressBar" class="progress-fill"></div>
+                    </div>
+                </div>
+
+                <div class="progress-details">
+                    <div class="detail-row">
+                        <span>Completed Files:</span>
+                        <span id="completedFiles">0</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Total Files:</span>
+                        <span id="totalFiles">0</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Task ID:</span>
+                        <span id="taskId" class="task-id">-</span>
+                    </div>
+                </div>
+
+                <!-- Cancel Button -->
+                <div class="progress-actions">
+                    <button id="cancelBtn" class="btn btn-secondary">
+                        ❌ Cancel Task
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="results-section hidden">
+            <div class="card">
+                <h2 class="section-title">Translation Results</h2>
+                
+                <div class="results-summary">
+                    <div class="summary-stat success">
+                        <span class="summary-number" id="successCount">0</span>
+                        <span class="summary-label">Successful</span>
+                    </div>
+                    <div class="summary-stat error">
+                        <span class="summary-number" id="errorCount">0</span>
+                        <span class="summary-label">Failed</span>
+                    </div>
+                </div>
+
+                <div id="resultsList" class="results-list">
+                    <!-- Results will be populated by JavaScript -->
+                </div>
+
+                <!-- Actions -->
+                <div class="results-actions">
+                    <button id="downloadAllBtn" class="btn btn-primary">
+                        📥 Download All
+                    </button>
+                    <button id="newTaskBtn" class="btn btn-secondary">
+                        ➕ New Translation
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Error Section -->
+        <section id="errorSection" class="error-section hidden">
+            <div class="card error-card">
+                <h2 class="section-title">❌ Error Occurred</h2>
+                <div id="errorMessage" class="error-message">
+                    <!-- Error message will be populated by JavaScript -->
+                </div>
+                <div class="error-actions">
+                    <button id="retryBtn" class="btn btn-primary">
+                        🔄 Try Again
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 Bilingual Book Maker. Powered by AI translation.</p>
+            <p class="footer-links">
+                <a href="#" id="aboutLink">About</a> |
+                <a href="#" id="helpLink">Help</a> |
+                <a href="#" id="apiDocsLink">API Docs</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p class="loading-text">Processing your request...</p>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
