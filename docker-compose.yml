@@ -4,10 +4,10 @@ services:
   redis:
     image: redis:7-alpine
     container_name: bilingual_redis
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
     volumes:
-      - redis_data:/data
+      - /home/ubuntu/configs/my-book-translator/redis_data:/data
     command: redis-server --appendonly yes
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -18,12 +18,12 @@ services:
   app:
     build: .
     container_name: bilingual_app
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     volumes:
-      - ./uploads:/app/uploads
-      - ./outputs:/app/outputs
-      - ./books:/app/books  # For existing books
+      - /home/ubuntu/configs/my-book-translator/uploads:/app/uploads
+      - /home/ubuntu/configs/my-book-translator/outputs:/app/outputs
+      - /home/ubuntu/configs/my-book-translator/books:/app/books  # For existing books
     environment:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
@@ -47,9 +47,9 @@ services:
     build: .
     container_name: bilingual_worker
     volumes:
-      - ./uploads:/app/uploads
-      - ./outputs:/app/outputs
-      - ./books:/app/books
+      - /home/ubuntu/configs/my-book-translator/uploads:/app/uploads
+      - /home/ubuntu/configs/my-book-translator/outputs:/app/outputs
+      - /home/ubuntu/configs/my-book-translator/books:/app/books
     environment:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
@@ -58,6 +58,3 @@ services:
       redis:
         condition: service_healthy
     command: celery -A api.tasks worker --loglevel=info --concurrency=2
-
-volumes:
-  redis_data:
